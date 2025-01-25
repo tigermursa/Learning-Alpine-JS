@@ -1,0 +1,20 @@
+{
+  "name": "user-manager",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tailwindcss -i ./src/styles/input.css -o ./src/styles/output.css --watch",
+    "build": "tailwindcss -i ./src/styles/input.css -o ./src/styles/output.css --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "",
+  "dependencies": {
+    "alpinejs": "^3.14.8",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^4.0.0"
+  }
+}
