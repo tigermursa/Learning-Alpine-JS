@@ -1,0 +1,21 @@
+
+1) What is Alpine.js?  
+- Lightweight JavaScript framework for adding interactivity to HTML via declarative attributes (x-data, x-show).
+
+2) Where do we use Alpine.js?  
+- For simple interactivity in static sites (modals/tabs) without complex build tools.
+
+3) Why learn Alpine.js if we know MERN?  
+- Faster for small projects; avoids MERN’s boilerplate for basic UI features.
+
+4) Will Alpine.js help in Shopify theme editing?  
+- Yes! Works seamlessly with Shopify’s Liquid templates for dynamic behavior.
+
+5) Can I make components like React in Alpine.js?  
+- No built-in components. Reuse logic via x-data or HTML includes.
+
+6) Can we maintain component structure here?  
+- Limited. Focuses on HTML enhancement, not isolated component architecture.
+
+7) Which needs more code: React or Alpine.js?  
+- Alpine.js needs less code for simple features. React suits complex apps.  
