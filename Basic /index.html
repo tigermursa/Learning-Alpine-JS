@@ -1,24 +1,133 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <script
       defer
-      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
     ></script>
+    <style>
+      [x-cloak] {
+        display: none !important;
+      }
+      .completed {
+        text-decoration: line-through;
+        opacity: 0.5;
+      }
+      .fade-enter-active,
+      .fade-leave-active {
+        transition: opacity 0.3s;
+      }
+      .fade-enter-from,
+      .fade-leave-to {
+        opacity: 0;
+      }
+    </style>
   </head>
   <body>
-    <div
-      x-data="{a: 2024 ,reset(){
-        this.a = 1960;}
-    
-    }"
-    >
-      <h1 x-text="a"></h1>
-      <button @click="a +=1">Increment</button>
-      <button x-on:click="a -=1">Decrement</button>
-      <button x-on:click="a +=1">Increment</button>
-      <button @click="reset()">Reset</button>
+    <div x-data="shoppingList()" x-cloak>
+      <h1 x-text="title"></h1>
+
+      <!-- Add Item Form -->
+      <form @submit.prevent="addItem">
+        <input
+          type="text"
+          x-model="newItem"
+          placeholder="Add grocery item..."
+          @input="clearError"
+        />
+        <button>Add</button>
+        <span x-show="error" x-text="error" style="color: red"></span>
+      </form>
+
+      <!-- Filter Controls -->
+      <div>
+        <button @click="filter = 'all'">All</button>
+        <button @click="filter = 'remaining'">Remaining</button>
+      </div>
+
+      <!-- List -->
+      <ul>
+        <template x-for="item in filteredItems" :key="item.id">
+          <li x-transition:enter.duration.500ms class="fade-enter-active">
+            <input
+              type="checkbox"
+              x-model="item.completed"
+              @change="saveToLocalStorage"
+            />
+            <span
+              :class="{ completed: item.completed }"
+              x-text="item.text"
+            ></span>
+            <button @click="removeItem(item.id)">×</button>
+          </li>
+        </template>
+      </ul>
+
+      <!-- Stats -->
+      <p>
+        Total: <span x-text="totalItems"></span> | Remaining:
+        <span x-text="remainingItems"></span>
+      </p>
     </div>
 
-    <div></div>
+    <script>
+      function shoppingList() {
+        return {
+          title: "My Shopping List",
+          newItem: "",
+          items: [],
+          filter: "all",
+          error: "",
+
+          init() {
+            this.items = JSON.parse(localStorage.getItem("shoppingList")) || [];
+          },
+
+          addItem() {
+            if (!this.newItem.trim()) {
+              this.error = "Please enter an item!";
+              return;
+            }
+            this.items.push({
+              id: Date.now(),
+              text: this.newItem,
+              completed: false,
+            });
+            this.newItem = "";
+            this.saveToLocalStorage();
+          },
+
+          removeItem(id) {
+            this.items = this.items.filter((item) => item.id !== id);
+            this.saveToLocalStorage();
+          },
+
+          saveToLocalStorage() {
+            localStorage.setItem("shoppingList", JSON.stringify(this.items));
+          },
+
+          clearError() {
+            this.error = "";
+          },
+
+          get totalItems() {
+            return this.items.length;
+          },
+
+          get remainingItems() {
+            return this.items.filter((item) => !item.completed).length;
+          },
+
+          get filteredItems() {
+            return this.items.filter((item) => {
+              if (this.filter === "all") return true;
+              return this.filter === "remaining"
+                ? !item.completed
+                : item.completed;
+            });
+          },
+        };
+      }
+    </script>
   </body>
 </html>
