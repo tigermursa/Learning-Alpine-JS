@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" x-cloak>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Management System</title>
+    <script
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/@heroicons/v2/24/outline"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-50">
+    <div x-data="userManager()" x-init="fetchUsers()" class="min-h-screen p-8">
+      <!-- Loading overlay -->
+      <div
+        x-show="loading"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      >
+        <div
+          class="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-2"
+        >
+          <svg
+            class="animate-spin h-6 w-6 text-blue-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <span class="text-gray-700">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div class="max-w-7xl mx-auto space-y-8">
+        <!-- Header -->
+        <div
+          class="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm"
+        >
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">
+              User Management System
+            </h1>
+            <p class="text-gray-500 mt-1">
+              Total Users: <span x-text="users.length"></span>
+            </p>
+          </div>
+          <button
+            @click="showUserForm = true; mode='create'"
+            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center"
+          >
+            <svg
+              class="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add User
+          </button>
+        </div>
+
+        <!-- User Table -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div
+            class="px-6 py-4 border-b flex items-center justify-between bg-gray-50"
+          >
+            <div class="flex items-center space-x-4">
+              <h4 class="font-medium text-gray-900">User Directory</h4>
+              <div class="flex items-center space-x-2">
+                <button
+                  @click="showActive = true"
+                  :class="showActive ? 'bg-blue-100 text-blue-600' : 'text-gray-500'"
+                  class="px-3 py-1 rounded-md text-sm"
+                >
+                  Active (<span x-text="activeUsersCount"></span>)
+                </button>
+                <button
+                  @click="showActive = false"
+                  :class="!showActive ? 'bg-blue-100 text-blue-600' : 'text-gray-500'"
+                  class="px-3 py-1 rounded-md text-sm"
+                >
+                  Deleted (<span x-text="deletedUsersCount"></span>)
+                </button>
+              </div>
+            </div>
+            <div class="relative">
+              <input
+                type="text"
+                x-model="searchQuery"
+                placeholder="Search users..."
+                class="w-64 px-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Name
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Contact
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Location
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Details
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Status
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                  >
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <template x-for="user in filteredUsers" :key="user._id">
+                  <tr>
+                    <td class="px-6 py-4">
+                      <div class="flex items-center">
+                        <div class="ml-4">
+                          <div
+                            class="font-medium text-gray-900"
+                            x-text="`${user.firstName} ${user.lastName}`"
+                          ></div>
+                          <div
+                            class="text-sm text-gray-500"
+                            x-text="user.gender"
+                          ></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div
+                        class="text-sm text-gray-900"
+                        x-text="user.email"
+                      ></div>
+                      <div
+                        class="text-sm text-gray-500"
+                        x-text="user.phoneNumber"
+                      ></div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div
+                        class="text-sm text-gray-900"
+                        x-text="user.country"
+                      ></div>
+                      <div
+                        class="text-sm text-gray-500"
+                        x-text="user.city"
+                      ></div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <div class="text-sm">
+                        <span class="text-gray-900" x-text="user.age"></span>
+                        years
+                        <span class="mx-1">·</span>
+                        <span class="text-gray-900" x-text="user.work"></span>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4">
+                      <span
+                        x-text="user.isDeleted ? 'Deleted' : 'Active'"
+                        :class="user.isDeleted ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'"
+                        class="px-2 py-1 rounded-full text-xs font-medium"
+                      ></span>
+                    </td>
+                    <td class="px-6 py-4 space-x-2">
+                      <button
+                        @click="editUser(user)"
+                        class="text-blue-600 hover:text-blue-900"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        @click="toggleDeleteStatus(user._id)"
+                        class="text-red-600 hover:text-red-900"
+                      >
+                        <span
+                          x-text="user.isDeleted ? 'Restore' : 'Delete'"
+                        ></span>
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("alpine:init", () => {
+        Alpine.data("userManager", () => ({
+          users: [],
+          loading: true,
+          searchQuery: "",
+          showActive: true,
+
+          // Computed properties
+          get activeUsersCount() {
+            return this.users.filter((user) => !user.isDeleted).length;
+          },
+          get deletedUsersCount() {
+            return this.users.filter((user) => user.isDeleted).length;
+          },
+          get filteredUsers() {
+            return this.users.filter((user) => {
+              const matchesStatus = this.showActive
+                ? !user.isDeleted
+                : user.isDeleted;
+              const matchesSearch = Object.values(user).some((value) =>
+                String(value)
+                  .toLowerCase()
+                  .includes(this.searchQuery.toLowerCase())
+              );
+              return matchesStatus && matchesSearch;
+            });
+          },
+
+          // Methods
+          async fetchUsers() {
+            try {
+              this.loading = true;
+              const response = await fetch(
+                "https://crudemate-server.vercel.app/api/v1/get-all-users"
+              );
+
+              if (!response.ok) throw new Error("Failed to fetch users");
+              const { data } = await response.json();
+
+              // Correct data path: data.data -> data
+              this.users = data || [];
+            } catch (error) {
+              console.error("Error:", error);
+              alert("Error fetching users: " + error.message);
+            } finally {
+              this.loading = false;
+            }
+          },
+
+          async toggleDeleteStatus(userId) {
+            try {
+              const user = this.users.find((u) => u._id === userId);
+              const response = await fetch(`/api/users/${userId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ isDeleted: !user.isDeleted }),
+              });
+
+              if (response.ok) {
+                user.isDeleted = !user.isDeleted;
+              }
+            } catch (error) {
+              console.error("Error updating user:", error);
+            }
+          },
+        }));
+      });
+    </script>
+  </body>
+</html>

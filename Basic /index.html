@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+  </head>
+  <body>
+    <div
+      x-data="{a: 2024 ,reset(){
+        this.a = 1960;}
+    
+    }"
+    >
+      <h1 x-text="a"></h1>
+      <button @click="a +=1">Increment</button>
+      <button x-on:click="a -=1">Decrement</button>
+      <button x-on:click="a +=1">Increment</button>
+      <button @click="reset()">Reset</button>
+    </div>
+
+    <div></div>
+  </body>
+</html>
